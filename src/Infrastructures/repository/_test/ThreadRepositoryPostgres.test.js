@@ -1,4 +1,6 @@
 // const InvariantError = require('../../../Commons/exceptions/InvariantError');
+const AuthorizationError = require('../../../Commons/exceptions/AuthorizationError');
+const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
 const pool = require('../../database/postgres/pool');
 const ThreadRepositoryPosgres = require('../ThreadRepositoryPostgres');
 const AddThread = require('../../../Domains/threads/entities/AddThread');
@@ -6,6 +8,7 @@ const AddedThread = require('../../../Domains/threads/entities/AddedThread');
 const AddComment = require('../../../Domains/threads/entities/AddComment');
 const AddedComment = require('../../../Domains/threads/entities/AddedComment');
 const ThreadsTableTestHelper = require('../../../../tests/ThreadsTableTestHelper');
+const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
 const UserRepositoryPostgres = require('../UserRepositoryPostgres');
 const RegisterUser = require('../../../Domains/users/entities/RegisterUser');
 const DeleteComment = require('../../../Domains/threads/entities/DeleteComment');
@@ -13,6 +16,7 @@ const DeleteComment = require('../../../Domains/threads/entities/DeleteComment')
 describe('ThreadRepositoryPostgres', () => {
   afterEach(async () => {
     await ThreadsTableTestHelper.cleanTable();
+    await UsersTableTestHelper.cleanTable();
   });
 
   afterAll(async () => {
@@ -112,6 +116,39 @@ describe('ThreadRepositoryPostgres', () => {
       expect(thread).toHaveLength(1);
     });
 
+    it('should throw error if thread not found when AddComment', async () => {
+    // Arrange
+      const addThread = new AddThread('user-123', {
+        title: 'Thread Title',
+        body: 'Thread Body',
+      });
+
+      // different thread id 123 != 12
+      const addComment = new AddComment('user-123', {
+        content: 'comment',
+      }, 'thread-12');
+
+      const registerUser = new RegisterUser({
+        username: 'dicoding',
+        password: 'secret_password',
+        fullname: 'Dicoding Indonesia',
+      });
+
+      const fakeIdGenerator = () => '123'; // stub
+
+      const userRepositoryPostgres = new UserRepositoryPostgres(pool, fakeIdGenerator);
+      const threadRepositoryPostgres = new ThreadRepositoryPosgres(pool, fakeIdGenerator);
+
+      // action
+      await userRepositoryPostgres.addUser(registerUser);
+      await threadRepositoryPostgres.addThread(addThread);
+
+      // assert
+      await expect(threadRepositoryPostgres.findThread(addComment.threadId))
+        .rejects
+        .toThrowError('Thread not found, cannot add comment');
+    });
+
     it('should return added comment correctly', async () => {
       // Arrange
       const addThread = new AddThread('user-123', {
@@ -181,7 +218,83 @@ describe('ThreadRepositoryPostgres', () => {
       // assert
 
       const thread = await ThreadsTableTestHelper.findCommentById('comment-123');
-      expect(thread).toHaveLength(0);
+      expect(thread).toHaveLength(1);
+      expect(thread[0].content).toStrictEqual('deleted');
+    });
+    it('should throw error if comment already deleted', async () => {
+    // Arrange
+      const addThread = new AddThread('user-123', {
+        title: 'Thread Title',
+        body: 'Thread Body',
+      });
+
+      const addComment = new AddComment('user-123', {
+        content: 'comment',
+      }, 'thread-123');
+
+      const registerUser = new RegisterUser({
+        username: 'dicoding',
+        password: 'secret_password',
+        fullname: 'Dicoding Indonesia',
+      });
+
+      const deleteComment = new DeleteComment('comment-123', 'thread-123', 'user-123');
+
+      const fakeIdGenerator = () => '123'; // stub
+
+      const userRepositoryPostgres = new UserRepositoryPostgres(pool, fakeIdGenerator);
+      const threadRepositoryPostgres = new ThreadRepositoryPosgres(pool, fakeIdGenerator);
+
+      // action
+      await userRepositoryPostgres.addUser(registerUser);
+      await threadRepositoryPostgres.addThread(addThread);
+      await threadRepositoryPostgres.addComment(addComment);
+
+      await ThreadsTableTestHelper.deleteComment('comment-123');
+      // assert
+      await expect(threadRepositoryPostgres.verifyComment(deleteComment.commentId, deleteComment.userId))
+        .rejects
+        .toThrowError('Comment not found, fail to delete comment');
+      await expect(threadRepositoryPostgres.verifyComment(deleteComment.commentId, deleteComment.userId))
+        .rejects
+        .toThrow(NotFoundError);
+    });
+    it('should throw error if delete other people comment', async () => {
+      // Arrange
+      const addThread = new AddThread('user-123', {
+        title: 'Thread Title',
+        body: 'Thread Body',
+      });
+
+      const registerUser = new RegisterUser({
+        username: 'dicoding',
+        password: 'secret_password',
+        fullname: 'Dicoding Indonesia',
+      });
+
+      const deleteComment = new DeleteComment('comment-111', 'thread-123', 'user-123');
+
+      const fakeIdGenerator = () => '123'; // stub
+
+      const userRepositoryPostgres = new UserRepositoryPostgres(pool, fakeIdGenerator);
+      const threadRepositoryPostgres = new ThreadRepositoryPosgres(pool, fakeIdGenerator);
+
+      // action
+      await userRepositoryPostgres.addUser(registerUser);
+      await threadRepositoryPostgres.addThread(addThread);
+
+      await UsersTableTestHelper.addUser({
+        id: 'user-111', username: 'usernameee', password: 'pwpwpwpw', fullname: 'namamama',
+      });
+      await ThreadsTableTestHelper.addComment({ id: 'comment-111', threadId: 'thread-123', owner: 'user-111' });
+
+      // assert
+      await expect(threadRepositoryPostgres.verifyComment(deleteComment.commentId, deleteComment.userId))
+        .rejects
+        .toThrowError('Illegal access. Fail to delete comment');
+      await expect(threadRepositoryPostgres.verifyComment(deleteComment.commentId, deleteComment.userId))
+        .rejects
+        .toThrow(AuthorizationError);
     });
   });
 });

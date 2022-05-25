@@ -110,8 +110,10 @@ describe('/threads endpoint', () => {
 
       // create thread with helper
 
+      const date = new Date().toISOString();
+
       await ThreadsTableTestHelper.addThread({
-        id: 'thread-1', title: 'Thread Title', body: 'Body', owner: 'user-123',
+        id: 'thread-1', title: 'Thread Title', body: 'Body', owner: 'user-123', date,
       });
 
       // Action
@@ -134,7 +136,7 @@ describe('/threads endpoint', () => {
   });
 
   describe('when DELETE /threads/{threadId}/comments/{commentId}', () => {
-    it('should response 201 and delete comment', async () => {
+    it('should response 200 and delete comment', async () => {
       // Arrange
       const server = await createServer(container);
 
@@ -146,12 +148,14 @@ describe('/threads endpoint', () => {
 
       // create thread with helper
 
+      const date = new Date().toISOString();
+
       await ThreadsTableTestHelper.addThread({
-        id: 'thread-1', title: 'Thread Title', body: 'Body', owner: 'user-123',
+        id: 'thread-1', title: 'Thread Title', body: 'Body', owner: 'user-123', date,
       });
 
       await ThreadsTableTestHelper.addComment({
-        id: 'comment-1', content: 'Comments', owner: 'user-123', threadId: 'thread-1',
+        id: 'comment-1', content: 'Comments', owner: 'user-123', threadId: 'thread-1', date,
       });
 
       // Action
@@ -167,7 +171,44 @@ describe('/threads endpoint', () => {
 
       // Assert
       const responseJson = JSON.parse(response.payload);
-      expect(response.statusCode).toEqual(201);
+      expect(response.statusCode).toEqual(200);
+      expect(responseJson.status).toEqual('success');
+    });
+  });
+
+  describe('when GET /threads/{threadId}', () => {
+    it('should response 200 and GET thread', async () => {
+      // Arrange
+      const server = await createServer(container);
+
+      // create thread with helper
+
+      const date = new Date().toISOString();
+
+      await AccessTokenTestHelper.getAccessToken('user-123');
+
+      await ThreadsTableTestHelper.addThread({
+        id: 'thread-1', title: 'Thread Title', body: 'Body', owner: 'user-123', date,
+      });
+
+      await ThreadsTableTestHelper.addComment({
+        id: 'comment-1', content: 'Comments', owner: 'user-123', threadId: 'thread-1', date,
+      });
+
+      await ThreadsTableTestHelper.addComment({
+        id: 'comment-2', content: 'Comments', owner: 'user-123', threadId: 'thread-1', date,
+      });
+
+      // Action
+
+      const response = await server.inject({
+        method: 'GET',
+        url: '/threads/thread-1',
+      });
+
+      // Assert
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(200);
       expect(responseJson.status).toEqual('success');
     });
   });

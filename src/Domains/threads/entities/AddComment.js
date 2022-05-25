@@ -33,11 +33,11 @@ class AddComment {
 
   _verifyUserId(userId) {
     if (!userId) {
-      throw new Error('ADD_THREAD.NOT_CONTAIN_NEEDED_PROPERTY');
+      throw new Error('ADD_COMMENT.NOT_CONTAIN_NEEDED_PROPERTY');
     }
 
     if (typeof userId !== 'string') {
-      throw new Error('ADD_THREAD.NOT_MEET_DATA_TYPE_SPECIFICATION');
+      throw new Error('ADD_COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION');
     }
   }
 }

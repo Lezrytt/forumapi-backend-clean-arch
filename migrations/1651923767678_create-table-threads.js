@@ -17,9 +17,13 @@ exports.up = (pgm) => {
     owner: {
       type: 'VARCHAR(50)',
       notNull: true,
-      // references: 'users',
-      // onDelete: 'cascade',
-      // onUpdate: 'cascade',
+      references: 'users',
+      onDelete: 'cascade',
+      onUpdate: 'cascade',
+    },
+    date: {
+      type: 'VARCHAR(50)',
+      notNull: true,
     },
   });
 };

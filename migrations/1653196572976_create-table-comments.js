@@ -24,6 +24,10 @@ exports.up = (pgm) => {
       onDelete: 'cascade',
       onUpdate: 'cascade',
     },
+    date: {
+      type: 'VARCHAR(50)',
+      notNull: true,
+    },
   });
 };
 

@@ -1,4 +1,4 @@
-const InvariantError = require('../../Commons/exceptions/InvariantError');
+// const InvariantError = require('../../Commons/exceptions/InvariantError');
 const AuthorizationError = require('../../Commons/exceptions/AuthorizationError');
 const NotFoundError = require('../../Commons/exceptions/NotFoundError');
 const AddedThread = require('../../Domains/threads/entities/AddedThread');
@@ -17,10 +17,11 @@ class ThreadRepositoryPostgres extends ThreadRepository {
     const owner = userId;
 
     const id = `thread-${this._idGenerator()}`;
+    const date = new Date().toISOString();
 
     const query = {
-      text: 'INSERT INTO threads VALUES($1, $2, $3, $4) RETURNING id, title, owner',
-      values: [id, title, body, owner],
+      text: 'INSERT INTO threads VALUES($1, $2, $3, $4, $5) RETURNING id, title, owner',
+      values: [id, title, body, owner, date],
     };
 
     const result = await this._pool.query(query);
@@ -33,12 +34,19 @@ class ThreadRepositoryPostgres extends ThreadRepository {
     const owner = userId;
 
     const id = `comment-${this._idGenerator()}`;
+    const date = new Date().toISOString();
 
     const query = {
-      text: 'INSERT INTO comments VALUES($1, $2, $3, $4) RETURNING id, content, owner',
-      values: [id, content, threadId, owner],
+      text: 'INSERT INTO comments VALUES($1, $2, $3, $4, $5) RETURNING id, content, owner',
+      values: [id, content, threadId, owner, date],
     };
 
+    const result = await this._pool.query(query);
+
+    return new AddedComment({ ...result.rows[0] });
+  }
+
+  async findThread(threadId) {
     const findThreadQuery = {
       text: 'SELECT * FROM threads WHERE id = $1',
       values: [threadId],
@@ -49,17 +57,13 @@ class ThreadRepositoryPostgres extends ThreadRepository {
     if (!findThreadResult.rowCount) {
       throw new NotFoundError('Thread not found, cannot add comment');
     }
-
-    const result = await this._pool.query(query);
-
-    return new AddedComment({ ...result.rows[0] });
   }
 
   async deleteComment(deleteComment) {
     const { commentId, threadId, userId } = deleteComment;
 
     const query = {
-      text: 'DELETE FROM comments WHERE id = $1 AND thread_id = $2 AND owner = $3 RETURNING *',
+      text: 'UPDATE comments SET content = \'deleted\' WHERE id = $1 AND thread_id = $2 AND owner = $3 RETURNING *',
       values: [commentId, threadId, userId],
     };
 
@@ -68,7 +72,7 @@ class ThreadRepositoryPostgres extends ThreadRepository {
 
   async verifyComment(commentId, userId) {
     const findCommentQuery = {
-      text: 'SELECT owner FROM COMMENTS WHERE id = $1',
+      text: 'SELECT * from comments WHERE id = $1 AND content != \'deleted\'',
       values: [commentId],
     };
 
@@ -81,6 +85,30 @@ class ThreadRepositoryPostgres extends ThreadRepository {
     if (foundComment.rows[0].owner !== userId) {
       throw new AuthorizationError('Illegal access. Fail to delete comment');
     }
+  }
+
+  async getDetailThread(threadId) {
+    const findThread = {
+      text: 'SELECT threads.*, users.username FROM threads INNER JOIN users ON threads.owner = users.id WHERE threads.id = $1',
+      values: [threadId],
+    };
+
+    const result = await this._pool.query(findThread);
+
+    const detail = result.rows[0];
+
+    return detail;
+  }
+
+  async getThreadComments(threadId) {
+    const findComments = {
+      text: 'SELECT comments.id, users.username, comments.date, comments.content FROM comments INNER JOIN users ON comments.owner = users.id WHERE comments.thread_id = $1',
+      values: [threadId],
+    };
+
+    const comments = await this._pool.query(findComments);
+
+    return comments.rows;
   }
 }
 

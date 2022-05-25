@@ -1,6 +1,7 @@
 const ThreadRepository = require('../../../Domains/threads/ThreadRepository');
 const AddThreadUseCase = require('../AddThreadUseCase');
 const AddThread = require('../../../Domains/threads/entities/AddThread');
+const AddedThread = require('../../../Domains/threads/entities/AddedThread');
 
 describe('AddThreadUseCase', () => {
   it('should simulate adding thread action correctly', async () => {
@@ -11,12 +12,11 @@ describe('AddThreadUseCase', () => {
     };
     const userId = 'user-1';
 
-    const expectedAddedThread = {
+    const expectedAddedThread = new AddedThread({
       id: 'thread-1',
       title: payload.title,
-      body: payload.body,
       owner: userId,
-    };
+    });
 
     // creating depedency of the usecase
 

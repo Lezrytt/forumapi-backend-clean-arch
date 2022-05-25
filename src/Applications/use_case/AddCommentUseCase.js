@@ -10,7 +10,7 @@ class AddCommentUseCase {
     this._verifyPayload(payload);
     const addComment = new AddComment(userId, payload, threadId);
 
-    // this._threadRepository.findThreadById();
+    await this._threadRepository.findThread(threadId);
 
     return this._threadRepository.addComment(addComment);
   }
