@@ -43,9 +43,13 @@ describe('AddCommentUseCase', () => {
 
     // Action
     expect(addedComment).toStrictEqual(expectedAddedComment);
-    expect(mockThreadRepository.addComment).toBeCalledWith(new AddComment(userId, {
-      content: payload.content,
-    }, threadId));
+    expect(mockThreadRepository.addComment).toBeCalledWith(new AddComment(
+      {
+        userId,
+        content: payload.content,
+        threadId,
+      },
+    ));
     expect(mockThreadRepository.findThread).toBeCalledWith(threadId);
   });
 

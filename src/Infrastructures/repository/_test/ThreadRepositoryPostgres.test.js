@@ -90,9 +90,11 @@ describe('ThreadRepositoryPostgres', () => {
         body: 'Thread Body',
       });
 
-      const addComment = new AddComment('user-123', {
+      const addComment = new AddComment({
+        userId: 'user-123',
         content: 'comment',
-      }, 'thread-123');
+        threadId: 'thread-123',
+      });
 
       const registerUser = new RegisterUser({
         username: 'dicoding',
@@ -124,9 +126,11 @@ describe('ThreadRepositoryPostgres', () => {
       });
 
       // different thread id 123 != 12
-      const addComment = new AddComment('user-123', {
+      const addComment = new AddComment({
+        userId: 'user-123',
         content: 'comment',
-      }, 'thread-12');
+        threadId: 'thread-12',
+      });
 
       const registerUser = new RegisterUser({
         username: 'dicoding',
@@ -146,7 +150,7 @@ describe('ThreadRepositoryPostgres', () => {
       // assert
       await expect(threadRepositoryPostgres.findThread(addComment.threadId))
         .rejects
-        .toThrowError('Thread not found, cannot add comment');
+        .toThrowError('Thread not found');
     });
 
     it('should return added comment correctly', async () => {
@@ -156,9 +160,11 @@ describe('ThreadRepositoryPostgres', () => {
         body: 'Thread Body',
       });
 
-      const addComment = new AddComment('user-123', {
+      const addComment = new AddComment({
+        userId: 'user-123',
         content: 'comment',
-      }, 'thread-123');
+        threadId: 'thread-123',
+      });
 
       const registerUser = new RegisterUser({
         username: 'dicoding',
@@ -192,10 +198,11 @@ describe('ThreadRepositoryPostgres', () => {
         body: 'Thread Body',
       });
 
-      const addComment = new AddComment('user-123', {
+      const addComment = new AddComment({
+        userId: 'user-123',
         content: 'comment',
-      }, 'thread-123');
-
+        threadId: 'thread-123',
+      });
       const registerUser = new RegisterUser({
         username: 'dicoding',
         password: 'secret_password',
@@ -228,9 +235,11 @@ describe('ThreadRepositoryPostgres', () => {
         body: 'Thread Body',
       });
 
-      const addComment = new AddComment('user-123', {
+      const addComment = new AddComment({
+        userId: 'user-123',
         content: 'comment',
-      }, 'thread-123');
+        threadId: 'thread-123',
+      });
 
       const registerUser = new RegisterUser({
         username: 'dicoding',
@@ -254,7 +263,7 @@ describe('ThreadRepositoryPostgres', () => {
       // assert
       await expect(threadRepositoryPostgres.verifyComment(deleteComment.commentId, deleteComment.userId))
         .rejects
-        .toThrowError('Comment not found, fail to delete comment');
+        .toThrowError('Cannot verify comment. Comment do not exist');
       await expect(threadRepositoryPostgres.verifyComment(deleteComment.commentId, deleteComment.userId))
         .rejects
         .toThrow(NotFoundError);
@@ -291,10 +300,90 @@ describe('ThreadRepositoryPostgres', () => {
       // assert
       await expect(threadRepositoryPostgres.verifyComment(deleteComment.commentId, deleteComment.userId))
         .rejects
-        .toThrowError('Illegal access. Fail to delete comment');
+        .toThrowError('Illegal access. Comment owner and user do not match!');
       await expect(threadRepositoryPostgres.verifyComment(deleteComment.commentId, deleteComment.userId))
         .rejects
         .toThrow(AuthorizationError);
+    });
+    describe('verifyComment function', () => {
+      it('should throw error if comment do not exist', async () => {
+        // Arrange
+        const payload = {
+          commentId: 'comment-123',
+          userId: 'user-123',
+        };
+
+        const fakeIdGenerator = '123';
+        const threadRepositoryPostgres = new ThreadRepositoryPosgres(pool, fakeIdGenerator);
+
+        // action
+        await expect(threadRepositoryPostgres.verifyComment(payload.commentId, payload.userId))
+          .rejects
+          .toThrow(NotFoundError);
+      });
+    });
+  });
+  describe('getDetailThread function', () => {
+    it('should get thread correctly', async () => {
+      const payload = {
+        threadId: 'thread-123',
+      };
+
+      const expectedThread = {
+        id: 'thread-123',
+        title: 'Thread Title',
+        body: 'Body Thread',
+        owner: 'user-123',
+        date: 'date',
+        username: 'dicoding',
+      };
+
+      await UsersTableTestHelper.addUser({ id: 'user-123' });
+      await ThreadsTableTestHelper.addThread({ id: 'thread-123', owner: 'user-123', date: 'date' });
+
+      const fakeIdGenerator = '123';
+      const threadRepositoryPostgres = new ThreadRepositoryPosgres(pool, fakeIdGenerator);
+
+      const thread = await threadRepositoryPostgres.getDetailThread(payload.threadId);
+
+      expect(thread).toStrictEqual(expectedThread);
+    });
+  });
+  describe('getThreadComments function', () => {
+    it('should get comments in thread correctly', async () => {
+      const payload = {
+        threadId: 'thread-123',
+      };
+
+      const expectedComments = [
+        {
+          id: 'comment-123',
+          username: 'dicoding',
+          date: 'date',
+          content: 'content',
+        },
+        {
+          id: 'comment-124',
+          username: 'dicoding',
+          date: 'date',
+          content: 'content',
+        }];
+
+      await UsersTableTestHelper.addUser({ id: 'user-123' });
+      await ThreadsTableTestHelper.addThread({ id: 'thread-123', owner: 'user-123', date: 'date' });
+      await ThreadsTableTestHelper.addComment({
+        id: 'comment-123', content: 'content', date: 'date', threadId: 'thread-123',
+      });
+      await ThreadsTableTestHelper.addComment({
+        id: 'comment-124', content: 'content', date: 'date', threadId: 'thread-123',
+      });
+
+      const fakeIdGenerator = '123';
+      const threadRepositoryPostgres = new ThreadRepositoryPosgres(pool, fakeIdGenerator);
+
+      const comments = await threadRepositoryPostgres.getThreadComments(payload.threadId);
+
+      expect(comments).toStrictEqual(expectedComments);
     });
   });
 });

@@ -46,19 +46,6 @@ class ThreadRepositoryPostgres extends ThreadRepository {
     return new AddedComment({ ...result.rows[0] });
   }
 
-  async findThread(threadId) {
-    const findThreadQuery = {
-      text: 'SELECT * FROM threads WHERE id = $1',
-      values: [threadId],
-    };
-
-    const findThreadResult = await this._pool.query(findThreadQuery);
-
-    if (!findThreadResult.rowCount) {
-      throw new NotFoundError('Thread not found, cannot add comment');
-    }
-  }
-
   async deleteComment(deleteComment) {
     const { commentId, threadId, userId } = deleteComment;
 
@@ -79,11 +66,11 @@ class ThreadRepositoryPostgres extends ThreadRepository {
     const foundComment = await this._pool.query(findCommentQuery);
 
     if (!foundComment.rowCount) {
-      throw new NotFoundError('Comment not found, fail to delete comment');
+      throw new NotFoundError('Cannot verify comment. Comment do not exist');
     }
 
     if (foundComment.rows[0].owner !== userId) {
-      throw new AuthorizationError('Illegal access. Fail to delete comment');
+      throw new AuthorizationError('Illegal access. Comment owner and user do not match!');
     }
   }
 
@@ -98,6 +85,19 @@ class ThreadRepositoryPostgres extends ThreadRepository {
     const detail = result.rows[0];
 
     return detail;
+  }
+
+  async findThread(threadId) {
+    const findThreadQuery = {
+      text: 'SELECT * FROM threads WHERE id = $1',
+      values: [threadId],
+    };
+
+    const findThreadResult = await this._pool.query(findThreadQuery);
+
+    if (!findThreadResult.rowCount) {
+      throw new NotFoundError('Thread not found');
+    }
   }
 
   async getThreadComments(threadId) {

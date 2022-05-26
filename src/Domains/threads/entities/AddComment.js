@@ -1,10 +1,12 @@
+const InvariantError = require('../../../Commons/exceptions/InvariantError');
+
 class AddComment {
-  constructor(userId, payload, threadId) {
-    this._verifyPayload(payload);
+  constructor(object) {
+    const { userId, content, threadId } = object;
+
+    this._verifyPayload(content);
     this._verifyUserId(userId);
     this._verifyParams(threadId);
-
-    const { content } = payload;
 
     this.userId = userId;
     this.content = content;
@@ -21,15 +23,25 @@ class AddComment {
     }
   }
 
-  _verifyPayload({ content }) {
+  _verifyPayload(content) {
     if (!content) {
-      throw new Error('ADD_COMMENT.NOT_CONTAIN_NEEDED_PROPERTY');
+      throw new InvariantError('Fail to add comment');
     }
 
     if (typeof content !== 'string') {
-      throw new Error('ADD_COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION');
+      throw new InvariantError('Fail to add comment');
     }
   }
+
+  // _verifyPayload({ content }) {
+  //   if (!content) {
+  //     throw new Error('ADD_COMMENT.NOT_CONTAIN_NEEDED_PROPERTY');
+  //   }
+
+  //   if (typeof content !== 'string') {
+  //     throw new Error('ADD_COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION');
+  //   }
+  // }
 
   _verifyUserId(userId) {
     if (!userId) {
