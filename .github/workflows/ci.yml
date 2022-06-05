@@ -27,21 +27,21 @@ jobs:
         npm run test
       env:
         CI: true
-        PGHOST_TEST: ${{ secrets.PGHOST_TEST }}
-        PGUSER_TEST: ${{ secrets.PGUSER_TEST }}
-        PGDATABASE_TEST: ${{ secrets.PGDATABASE_TEST }}
-        PGPASSWORD_TEST: ${{ secrets.PGPASSWORD_TEST }}
-        PGPORT_TEST: ${{ secrets.PGPORT_TEST }}
-        PGHOST: ${{ secrets.PGHOST_TEST }}
-        PGUSER: ${{ secrets.PGUSER_TEST }}
-        PGDATABASE: ${{ secrets.PGDATABASE_TEST }}
-        PGPASSWORD: ${{ secrets.PGPASSWORD_TEST }}
-        PGPORT: ${{ secrets.PGPORT_TEST }}
+        PGHOST_TEST: ec2-35-168-194-15.compute-1.amazonaws.com
+        PGUSER_TEST: rvvdemkbwfabfw
+        PGDATABASE_TEST: d7gmuf2ikmi3pn
+        PGPASSWORD_TEST: ca259e35aefb64d9f953f1729ecb1b35fed1b0076e3b2cbcbd73ffc29d1729f9
+        PGPORT_TEST: 5432
+        PGHOST: ec2-35-168-194-15.compute-1.amazonaws.com
+        PGUSER: rvvdemkbwfabfw
+        PGDATABASE: d7gmuf2ikmi3pn
+        PGPASSWORD: ca259e35aefb64d9f953f1729ecb1b35fed1b0076e3b2cbcbd73ffc29d1729f9
+        PGPORT: 5432
         ACCESS_TOKEN_KEY: ${{ secrets.ACCESS_TOKEN_KEY }}
         REFRESH_TOKEN_KEY: ${{ secrets.REFRESH_TOKEN_KEY }}
         DB_SSL: ${{ secrets.DB_SSL }}
         DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
         DB_SSL__REJECT_UNAUTHORIZED: ${{ secrets.DB_SSL_REJECT_UNAUTHORIZED }}
-        PGSSLMODE: ${{ secrets.PGSSLMODE }}
-        PGSSLMODE_TEST: ${{ secrets.PGSSLMODE}}
+        PGSSLMODE: no-verify
+        PGSSLMODE_TEST: no-verify
