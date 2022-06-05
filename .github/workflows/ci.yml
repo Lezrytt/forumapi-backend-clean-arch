@@ -44,3 +44,4 @@ jobs:
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
         DB_SSL__REJECT_UNAUTHORIZED: ${{ secrets.DB_SSL_REJECT_UNAUTHORIZED }}
         PGSSLMODE: ${{ secrets.PGSSLMODE }}
+        PGSSLMODE_TEST: ${{ secrets.PGSSLMODE}}
