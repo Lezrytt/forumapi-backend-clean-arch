@@ -7,9 +7,14 @@ const authentications = require('../../Interfaces/http/api/authentications');
 const threads = require('../../Interfaces/http/api/threads');
 
 const createServer = async (container) => {
+  let port = process.env.PORT;
+  if (port == null || port === '') {
+    port = 8000;
+  }
+
   const server = Hapi.server({
     host: process.env.HOST,
-    port: process.env.PORT,
+    port,
   });
 
   await server.register([
