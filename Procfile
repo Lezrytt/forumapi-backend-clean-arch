@@ -1,6 +1,6 @@
 web: npm run start
 install: npm install
-migrate-up: npm migrate up
-migrate-down: npm migrate down
-migrate-test-up: npm migrate:test up
-migrate-test-down: npm migrate:test down
+migrate-up: npm run migrate up
+migrate-down: npm run migrate down
+migrate-test-up: npm run migrate:test up
+migrate-test-down: npm run migrate:test down
