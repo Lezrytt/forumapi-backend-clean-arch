@@ -10,7 +10,7 @@ const createServer = async (container) => {
   const port = process.env.PORT;
 
   const server = Hapi.server({
-    host: process.env.HOST || '0.0.0.0',
+    host: '0.0.0.0',
     port: port || 5000,
   });
 
