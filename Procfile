@@ -1,4 +1,4 @@
-web: npm run start
+web: bin/start-nginx-solo bundle exec unicorn -c config/unicorn.rb
 nginx: npm run start
 install: npm install
 migrate-up: npm run migrate up
