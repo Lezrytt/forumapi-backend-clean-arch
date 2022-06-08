@@ -81,7 +81,7 @@ http {
   client_body_timeout <%= ENV['NGINX_CLIENT_BODY_TIMEOUT'] || 5 %>;
 
   upstream upstream_production {
-    server nginx-forumapi.herokuapp.com;
+    server powerful-eyrie-70963.herokuapp.com;
   }
 
   limit_req_zone $binary_remote_addr zone=one:10m rate=90r/m;
@@ -93,7 +93,7 @@ http {
       set $upstream upstream_production;
       proxy_pass http://$upstream;
       proxy_set_header x-forwarded-host $host;
-      proxy_set_header Host nginx-forumapi.herokuapp.com;
+      proxy_set_header Host powerful-eyrie-70963.herokuapp.com;
       limit_req zone=one;
     }
 
