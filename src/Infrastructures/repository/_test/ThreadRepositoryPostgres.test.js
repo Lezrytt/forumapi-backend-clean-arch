@@ -383,7 +383,7 @@ describe('ThreadRepositoryPostgres', () => {
 
       const comments = await threadRepositoryPostgres.getThreadComments(payload.threadId);
 
-      expect(comments).toStrictEqual(expectedComments);
+      expect(comments).toEqual(expectedComments);
     });
   });
 });
