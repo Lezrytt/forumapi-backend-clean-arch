@@ -94,6 +94,13 @@ http {
       proxy_pass http://$upstream;
       proxy_set_header x-forwarded-host $host;
       proxy_set_header Host powerful-eyrie-70963.herokuapp.com;
+    }
+
+    location /threads {
+      # set $upstream upstream_production;
+      proxy_pass http://$upstream;
+      # proxy_set_header x-forwarded-host $host;
+      # proxy_set_header Host powerful-eyrie-70963.herokuapp.com/threads;
       limit_req zone=one;
     }
 

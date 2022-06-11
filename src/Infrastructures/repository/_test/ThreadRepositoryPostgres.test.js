@@ -153,6 +153,40 @@ describe('ThreadRepositoryPostgres', () => {
         .toThrowError('Thread not found');
     });
 
+    it('should not throw error if thread is found', async () => {
+    // Arrange
+      const addThread = new AddThread('user-123', {
+        title: 'Thread Title',
+        body: 'Thread Body',
+      });
+
+      // the same thread id with thread
+      const addComment = new AddComment({
+        userId: 'user-123',
+        content: 'comment',
+        threadId: 'thread-123',
+      });
+
+      const registerUser = new RegisterUser({
+        username: 'dicoding',
+        password: 'secret_password',
+        fullname: 'Dicoding Indonesia',
+      });
+
+      const fakeIdGenerator = () => '123'; // stub
+
+      const userRepositoryPostgres = new UserRepositoryPostgres(pool, fakeIdGenerator);
+      const threadRepositoryPostgres = new ThreadRepositoryPosgres(pool, fakeIdGenerator);
+
+      // action
+      await userRepositoryPostgres.addUser(registerUser);
+      await threadRepositoryPostgres.addThread(addThread);
+
+      // assert
+      await expect(threadRepositoryPostgres.findThread(addComment.threadId))
+        .resolves;
+    });
+
     it('should return added comment correctly', async () => {
       // Arrange
       const addThread = new AddThread('user-123', {
@@ -306,6 +340,25 @@ describe('ThreadRepositoryPostgres', () => {
         .toThrow(AuthorizationError);
     });
     describe('verifyComment function', () => {
+      it('should not throw error if comment does exist', async () => {
+        // Arrange
+        const payload = {
+          commentId: 'comment-123',
+          userId: 'user-123',
+        };
+
+        const fakeIdGenerator = '123';
+
+        const threadRepositoryPostgres = new ThreadRepositoryPosgres(pool, fakeIdGenerator);
+
+        await UsersTableTestHelper.addUser({ id: 'user-123' });
+        await ThreadsTableTestHelper.addThread({ id: 'thread-123', owner: 'user-123', date: 'date' });
+        await ThreadsTableTestHelper.addComment({ id: payload.commentId, owner: payload.userId, threadId: 'thread-123' });
+
+        // action
+        await expect(threadRepositoryPostgres.verifyComment(payload.commentId, payload.userId))
+          .resolve;
+      });
       it('should throw error if comment do not exist', async () => {
         // Arrange
         const payload = {
