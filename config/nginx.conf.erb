@@ -84,6 +84,10 @@ http {
     server powerful-eyrie-70963.herokuapp.com;
   }
 
+  upstream_threads upstream_production_threads {
+    server powerful-eyrie-70963.herokuapp.com/threads;
+  }
+
   limit_req_zone $binary_remote_addr zone=one:10m rate=90r/m;
   server {
     listen <%= ENV["PORT"] %>;
@@ -97,10 +101,10 @@ http {
     }
 
     location /threads/ {
-      set $upstream upstream_production;
-      proxy_pass http://$upstream;
+      set $upstream_threads upstream_production_threads;
+      proxy_pass http://$upstream_threads;
       proxy_set_header x-forwarded-host $host;
-      proxy_set_header Host powerful-eyrie-70963.herokuapp.com;
+      proxy_set_header Host powerful-eyrie-70963.herokuapp.com/threads;
       limit_req zone=one;
     }
 
