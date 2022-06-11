@@ -88,9 +88,9 @@ http {
   server {
     listen <%= ENV["PORT"] %>;
     server_name _;
-
+    set $upstream upstream_production;
+    
     location / {
-      set $upstream upstream_production;
       proxy_pass http://$upstream;
       proxy_set_header x-forwarded-host $host;
       proxy_set_header Host powerful-eyrie-70963.herokuapp.com;
