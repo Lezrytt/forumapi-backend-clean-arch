@@ -89,18 +89,18 @@ http {
     listen <%= ENV["PORT"] %>;
     server_name _;
     set $upstream upstream_production;
-    
+
     location / {
       proxy_pass http://$upstream;
       proxy_set_header x-forwarded-host $host;
       proxy_set_header Host powerful-eyrie-70963.herokuapp.com;
     }
 
-    location /threads/ {
+    location /threads {
       # set $upstream upstream_production;
       proxy_pass http://$upstream/threads;
       proxy_set_header x-forwarded-host $host;
-      proxy_set_header Host powerful-eyrie-70963.herokuapp.com/threads;
+      proxy_set_header Host powerful-eyrie-70963.herokuapp.com;
       limit_req zone=one;
     }
 
