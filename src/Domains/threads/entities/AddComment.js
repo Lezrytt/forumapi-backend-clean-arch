@@ -15,7 +15,7 @@ class AddComment {
 
   _verifyParams(threadId) {
     if (!threadId) {
-      throw new Error('ADD_COMMENT.NOT_CONTAIN_NEEDED_PROPERTY');
+      throw new Error('ADD_COMMENT.NOT_CONTAIN_NEEDED_PROPERTY_TID');
     }
 
     if (typeof threadId !== 'string') {
@@ -45,7 +45,7 @@ class AddComment {
 
   _verifyUserId(userId) {
     if (!userId) {
-      throw new Error('ADD_COMMENT.NOT_CONTAIN_NEEDED_PROPERTY');
+      throw new Error('ADD_COMMENT.NOT_CONTAIN_NEEDED_PROPERTY_UID');
     }
 
     if (typeof userId !== 'string') {
