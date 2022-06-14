@@ -98,7 +98,7 @@ http {
 
     location /threads {
       # set $upstream upstream_production;
-      proxy_pass http://$upstream/threads;
+      proxy_pass http://$upstream;
       limit_req zone=one;
     }
 
