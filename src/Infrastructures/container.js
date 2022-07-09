@@ -15,6 +15,8 @@ const UserRepositoryPostgres = require('./repository/UserRepositoryPostgres');
 const BcryptPasswordHash = require('./security/BcryptPasswordHash');
 const ThreadRepository = require('../Domains/threads/ThreadRepository');
 const ThreadRepositoryPostgres = require('./repository/ThreadRepositoryPostgres');
+const DispatchRepository = require('../Domains/dispatch/DispatchRepository');
+const DispatchRepositoryPostgres = require('./repository/DispatchRepositoryPostgres');
 
 // use case
 const AddUserUseCase = require('../Applications/use_case/AddUserUseCase');
@@ -29,6 +31,7 @@ const AddThreadUseCase = require('../Applications/use_case/AddThreadUseCase');
 const AddCommentUseCase = require('../Applications/use_case/AddCommentUseCase');
 const DeleteCommentUseCase = require('../Applications/use_case/DeleteCommentUseCase');
 const GetDetailThreadUseCase = require('../Applications/use_case/GetDetailThreadUseCase');
+const DispatchUseCase = require('../Applications/use_case/DispatchUseCase');
 
 // creating container
 const container = createContainer();
@@ -63,6 +66,20 @@ container.register([
   {
     key: ThreadRepository.name,
     Class: ThreadRepositoryPostgres,
+    parameter: {
+      dependencies: [
+        {
+          concrete: pool,
+        },
+        {
+          concrete: nanoid,
+        },
+      ],
+    },
+  },
+  {
+    key: DispatchRepository.name,
+    Class: DispatchRepositoryPostgres,
     parameter: {
       dependencies: [
         {
@@ -215,6 +232,17 @@ container.register([
       dependencies: [{
         name: 'threadRepository',
         internal: ThreadRepository.name,
+      }],
+    },
+  },
+  {
+    key: DispatchUseCase.name,
+    Class: DispatchUseCase,
+    parameter: {
+      injectType: 'destructuring',
+      dependencies: [{
+        name: 'dispatchRepository',
+        internal: DispatchRepository.name,
       }],
     },
   },

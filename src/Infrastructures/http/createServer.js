@@ -5,6 +5,7 @@ const DomainErrorTranslator = require('../../Commons/exceptions/DomainErrorTrans
 const users = require('../../Interfaces/http/api/users');
 const authentications = require('../../Interfaces/http/api/authentications');
 const threads = require('../../Interfaces/http/api/threads');
+const dispatch = require('../../Interfaces/http/api/dispatch');
 
 const createServer = async (container) => {
   const port = process.env.PORT;
@@ -55,6 +56,10 @@ const createServer = async (container) => {
     },
     {
       plugin: threads,
+      options: { container },
+    },
+    {
+      plugin: dispatch,
       options: { container },
     },
   ]);
