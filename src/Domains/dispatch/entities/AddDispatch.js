@@ -28,7 +28,7 @@ class AddDispatch {
       throw new Error('ADD_DISPATCH.NOT_CONTAIN_NEEDED_PROPERTY_TID');
     }
 
-    if (typeof dispatch !== 'string') {
+    if (typeof dispatch !== 'number') {
       throw new Error('ADD_DISPATCH.NOT_MEET_DATA_TYPE_SPECIFICATION');
     }
   }

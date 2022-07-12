@@ -9,7 +9,7 @@ exports.up = (pgm) => {
       notNull: true,
     },
     dispatch: {
-      type: 'VARCHAR(50)',
+      type: 'INT',
       notNull: true,
     },
     created_at: {
